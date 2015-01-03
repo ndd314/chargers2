@@ -1,0 +1,17 @@
+---
+applications:
+- name: chargersv2-collector
+  memory: 128M
+  no-route: true
+  instances: 1
+  path: ./collector
+  buildpack: python_buildpack
+  command: python collector.py
+
+- name: chargersv2-gui
+  memory: 128M
+  instances: 1
+  host: chargers2
+  path: ./gui
+  buildpack: python_buildpack
+  command: python display.py
