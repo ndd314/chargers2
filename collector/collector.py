@@ -1,29 +1,58 @@
 from __future__ import print_function
-from static import sites
+
 from ChargePoint import Charger, ChargePointConnection
-from phant import Phant
+from kairos import Timeseries
+
+import redis
 import logging
 import time
+from pprint import pprint
+import json
 
 
 logging.basicConfig(format='%(asctime)s: %(levelname)s %(module)s:%(funcName)s | %(message)s', level=logging.DEBUG)
 
-p = Phant("Qx4XBL7d5phdQw82K1b6in86vQM",
-          'station_site', 'station_name', 'available', 'total',
-          private_key='L3WvRqAbwpsbyBedlPaYi7La4Em',
-          delete_key='jvrPmyVbxasg6X5YDBPjto87Y19',
-          base_url="http://phant.exaforge.com:8080"
+config_redis = redis.Redis(
+    'direct.exaforge.com', 6379, db=2, password="Habloo12"
 )
 
-cp = ChargePointConnection('Matt@cowger.us','Habloo12')
+ts_redis = redis.Redis(
+    'direct.exaforge.com', 6379, db=1, password="Habloo12"
+)
+
+intervals = json.loads(config_redis.get("intervals"))
+credentials = json.loads(config_redis.get("credentials"))
+garage_data = json.loads(config_redis.get("garage_data"))
+
+
+t = Timeseries(
+    ts_redis,
+    type='series',
+    read_func=int,
+    intervals=intervals
+)
+
+
+
+cp = ChargePointConnection(credentials['ChargePoint']['user'],
+                           credentials['ChargePoint']['password'],
+                           credentials['ChargePoint']['chargepoint_login_url']
+)
 
 while True:
-    for site in sites:
-        logging.info("Processing site: {}".format(site['filter_string']))
+    for site_name in garage_data.keys():
+        site = garage_data[site_name]
+        logging.info("Processing site: {}".format(site['regex']))
         site_info = cp.get_stations_info(site['url'])
         for charger_dict in site_info:
             charger = Charger(charger_dict)
             logging.info("Processing charger: {}".format(charger.station_name))
-            p.log(charger.station_name[0], charger.station_name[1], charger.port_count['available'],
-                    charger.port_count['total'])
+            if site['regex'] not in charger.station_name[1]:
+                logging.info("Skipping station {} because it failed to match filter string {}".format(charger.station_name,site['regex']))
+            else:
+                logging.debug("Pushing metric for {}".format(charger.station_name[1]))
+                t.insert(
+                    charger.station_name[1].replace(" ","-"),
+                    charger.port_count['available']
+                )
     time.sleep(300)

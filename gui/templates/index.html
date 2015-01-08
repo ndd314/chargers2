@@ -40,9 +40,10 @@
             VMware:
             {% for garage,data in vmware.items() %}
             <div class="btn-group">
-            <a href="#" class="active btn{% if data.avail_ports > 0 %} btn-success{%  else %} brn-danger {% endif %}">
+            <a href="#" style="min-width: 90px" data-html="true" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="{{ "<br>".join(all_avail[garage]) }}"
+               class="active btn{% if data.avail_ports > 0 %} btn-success{%  else %} btn-danger {% endif %}">
                 {{ garage }}<br/>
-                ({{ data.avail_ports }}/{{data.total_ports}})<br/><b>{{ data.percent }}%</b></a>
+                {{ data.avail_ports }}</a>
             </div>
             {% endfor %}
             <p>
@@ -50,10 +51,10 @@
                 {% for garage,data in emc.items() %}
 
             <div class="btn-group">
-                <a href="#"
-                   class="active btn{% if data.avail_ports > 0 %} btn-success{%  else %} brn-danger {% endif %}">
+                <a href="#" style="min-width: 90px" data-html="true" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="{{ "<br>".join(all_avail[garage]) }}"
+                   class="active btn{% if data.avail_ports > 0 %} btn-success{%  else %} btn-danger {% endif %}">
                     {{ garage }}<br/>
-                    ({{ data.avail_ports }}/{{data.total_ports}})<br/><b>{{ data.percent }}%</b></a>
+                    {{ data.avail_ports }}</a>
             </div>
             {% endfor %}
 
@@ -94,6 +95,10 @@
     ga('create', 'UA-52370800-1', 'auto');
     ga('require', 'displayfeatures');
     ga('send', 'pageview');
+
+    $(function () {
+        $("[data-toggle='tooltip']").tooltip();
+    });
 
 </script>
 

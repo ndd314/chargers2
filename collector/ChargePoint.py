@@ -4,7 +4,7 @@ import json
 
 import requests
 
-import static
+
 
 
 class Charger(object):
@@ -30,9 +30,10 @@ class Charger(object):
 
 class ChargePointConnection(object):
 
-    def __init__(self, cpuser, cppassword):
+    def __init__(self, cpuser, cppassword, login_url):
 
         self._cpsession = requests.session()
+        self._login_url = login_url
         self._cpuser = cpuser
         self._cppass = cppassword
         self._logged_in = False
@@ -54,7 +55,7 @@ class ChargePointConnection(object):
             'timezone': 'PST',
             'timezone_name': ''
         }
-        auth = self._cpsession.post(url=static.chargepoint_login_url, data=form_data)
+        auth = self._cpsession.post(url=self._login_url, data=form_data)
         self._logged_in = auth.json()['auth']
 
 

@@ -2,60 +2,40 @@ from __future__ import print_function
 from __future__ import division
 from flask import Flask, render_template, jsonify
 from flask.ext.cache import Cache
-from phant import Phant
-from pprint import pprint
-
+from kairos import Timeseries
+import json
+import redis
+import re
 import logging
 import os
 
 logging.basicConfig(format='%(asctime)s: %(levelname)s %(module)s:%(funcName)s | %(message)s', level=logging.DEBUG)
 
-garage_data = {
-    "Creekside": {
-          'regex': 'PG3',
-          'stations': ['PG3-STATION 19', 'PG3-STATION 20', 'PG3-STATION 21','PG3-STATION 22', 'PG3-STATION 23',
-                       'PG3-STATION 24', 'PG3-STATION 25', 'PG3-STATION 26'],
-          'company': 'VMware'
-        },
-    "Hilltop": {
-        'regex': 'PG1',
-        'stations': ['PG1-STATION 11', 'PG1-STATION 12', 'PG1-STATION 13', 'PG1-STATION 14', 'PG1-STATION 15',
-                     'PG1-STATION 16', 'PG1-STATION 17', 'PG1-STATION 18'],
-        'company': 'VMware'
-        },
-    "Central": {
-        'regex': 'PG2',
-        'stations': ['PG2-STATION 01', 'PG2-STATION 02', 'PG2-STATION 03', 'PG2-STATION 04', 'PG2-STATION 05',
-                     'PG2-STATION 06', 'PG2-STATION 07'],
-        'company': 'VMware'
-    },
-    "Santa_Clara": {
-        'regex': 'SANTA',
-        'stations': ['SANTA'],
-        'company': 'EMC'
-    },
-    "DPAD": {
-        'regex': 'MISSIONCOLLEGE',
-        'stations': ['MISSIONCOLLEGE1', 'MISSIONCOLLEGE2', 'MISSIONCOLLEGE3', 'MISSIONCOLLEGE4', 'MISSIONCOLLEGE5'],
-        'company': 'EMC'
-    },
-}
-
-p = Phant("Qx4XBL7d5phdQw82K1b6in86vQM",
-          'station_site', 'station_name', 'available', 'total',
-          base_url="http://phant.exaforge.com:8080"
+config_redis = redis.Redis(
+    'direct.exaforge.com', 6379, db=2, password="Habloo12"
 )
+
+ts_redis = redis.Redis(
+    'direct.exaforge.com', 6379, db=1, password="Habloo12"
+)
+
+intervals = json.loads(config_redis.get("intervals"))
+credentials = json.loads(config_redis.get("credentials"))
+garage_data = json.loads(config_redis.get("garage_data"))
+
 
 app = Flask(__name__)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
-@cache.memoize(timeout=300)
+t = Timeseries(ts_redis, type='series', read_func=int, intervals=intervals)
+
+@cache.memoize(timeout=30)
 def gen_live_counts_for_charger(charger_name):
-    live = p.get(
-        limit=1,
-        grep=('station_name',charger_name)
-    )
-    return live[0]
+    charger_name = charger_name.replace(" ","-")
+
+
+    logging.info("Querying for charger {}".format(charger_name))
+    return t.iterate(charger_name, 'minute', condense=True).next()[1][0]
 
 def gen_live_counts_for_garage(garage_name):
     garage_chargers = []
@@ -65,13 +45,10 @@ def gen_live_counts_for_garage(garage_name):
 
 def gen_summary_for_garage(garage_name):
     garage_data = gen_live_counts_for_garage(garage_name)
-    total_ports = 0
     avail_ports = 0
     for charger in garage_data:
-        total_ports += int(charger['total'])
-        avail_ports += int(charger['available'])
-    percent = int(round((avail_ports / total_ports) * 100,0))
-    return {"avail_ports": avail_ports, "total_ports": total_ports, "percent": percent}
+        avail_ports += charger
+    return {"avail_ports": avail_ports}
 
 def gen_summary_for_company(company):
     counts = {}
@@ -82,18 +59,22 @@ def gen_summary_for_company(company):
     return counts
 
 @app.route("/")
-@cache.cached(300)
+@cache.cached(timeout=60)
 def index():
-    return render_template("index.html", vmware=gen_summary_for_company("VMware"), emc=gen_summary_for_company("EMC"))
+    return render_template("index.html", vmware=gen_summary_for_company("VMware"), emc=gen_summary_for_company("EMC"), all_avail=get_all_avail())
 
-@app.route("/get_avail_chargers/<garage>")
+def get_all_avail():
+    all_avail = {}
+    for garage in garage_data.keys():
+        all_avail[garage] = get_avail(garage)
+    return all_avail
+
 def get_avail(garage):
     avail_chargers = []
-    data = gen_live_counts_for_garage(garage)
-    for charger in data:
-        if int(charger['available']) > 0:
-            avail_chargers.append(charger['station_name'])
-    return jsonify({'chargers': avail_chargers})
+    for station in garage_data[garage]['stations']:
+        if gen_live_counts_for_charger(station) > 0:
+            avail_chargers.append(re.sub("PG[1-3]-","",station))
+    return avail_chargers
 
 if __name__ == "__main__":
     port = int(os.getenv('VCAP_APP_PORT', '5000'))
