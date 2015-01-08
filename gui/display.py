@@ -12,11 +12,12 @@ import os
 logging.basicConfig(format='%(asctime)s: %(levelname)s %(module)s:%(funcName)s | %(message)s', level=logging.DEBUG)
 
 config_redis = redis.Redis(
-    'direct.exaforge.com', 6379, db=2, password="Habloo12"
+    os.getenv('REDIS_HOST_NAME'), int(os.getenv('REDIS_PORT')), db=int(os.getenv('CONFIG_DB')), password=os.getenv('REDIS_PASSWORD')
 )
 
 ts_redis = redis.Redis(
-    'direct.exaforge.com', 6379, db=1, password="Habloo12"
+    os.getenv('REDIS_HOST_NAME'), int(os.getenv('REDIS_PORT')), db=int(os.getenv('TS_DB')),
+    password=os.getenv('REDIS_PASSWORD')
 )
 
 intervals = json.loads(config_redis.get("intervals"))
@@ -32,10 +33,13 @@ t = Timeseries(ts_redis, type='series', read_func=int, intervals=intervals)
 @cache.memoize(timeout=30)
 def gen_live_counts_for_charger(charger_name):
     charger_name = charger_name.replace(" ","-")
-
-
     logging.info("Querying for charger {}".format(charger_name))
-    return t.iterate(charger_name, 'minute', condense=True).next()[1][0]
+
+    most_recent_timestamp = t.properties(charger_name)['minute']['last']
+    timestamp, value = t.get(charger_name,"minute",timestamp=most_recent_timestamp,condense=True).popitem(last=True)
+    value = value[0]
+    logging.debug("Retrieved: {} @ {}".format(value, timestamp))
+    return value
 
 def gen_live_counts_for_garage(garage_name):
     garage_chargers = []
@@ -59,7 +63,7 @@ def gen_summary_for_company(company):
     return counts
 
 @app.route("/")
-@cache.cached(timeout=60)
+#@cache.cached(timeout=60)
 def index():
     return render_template("index.html", vmware=gen_summary_for_company("VMware"), emc=gen_summary_for_company("EMC"), all_avail=get_all_avail())
 

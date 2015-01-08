@@ -8,16 +8,18 @@ import logging
 import time
 from pprint import pprint
 import json
-
+import os
 
 logging.basicConfig(format='%(asctime)s: %(levelname)s %(module)s:%(funcName)s | %(message)s', level=logging.DEBUG)
 
 config_redis = redis.Redis(
-    'direct.exaforge.com', 6379, db=2, password="Habloo12"
+    os.getenv('REDIS_HOST_NAME'), int(os.getenv('REDIS_PORT')), db=int(os.getenv('CONFIG_DB')),
+    password=os.getenv('REDIS_PASSWORD')
 )
 
 ts_redis = redis.Redis(
-    'direct.exaforge.com', 6379, db=1, password="Habloo12"
+    os.getenv('REDIS_HOST_NAME'), int(os.getenv('REDIS_PORT')), db=int(os.getenv('TS_DB')),
+    password=os.getenv('REDIS_PASSWORD')
 )
 
 intervals = json.loads(config_redis.get("intervals"))
