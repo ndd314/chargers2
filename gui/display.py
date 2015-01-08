@@ -30,7 +30,7 @@ cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 t = Timeseries(ts_redis, type='series', read_func=int, intervals=intervals)
 
-@cache.memoize(timeout=30)
+@cache.memoize(timeout=60)
 def gen_live_counts_for_charger(charger_name):
     charger_name = charger_name.replace(" ","-")
     logging.info("Querying for charger {}".format(charger_name))
@@ -63,7 +63,7 @@ def gen_summary_for_company(company):
     return counts
 
 @app.route("/")
-#@cache.cached(timeout=60)
+@cache.cached(timeout=300)
 def index():
     return render_template("index.html", vmware=gen_summary_for_company("VMware"), emc=gen_summary_for_company("EMC"), all_avail=get_all_avail())
 
