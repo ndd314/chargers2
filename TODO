@@ -1,0 +1,3 @@
+* Support splunk logging
+* Add GUI for subscriptions
+* Figure out a better way for the config - maybe JSON in env variables?
