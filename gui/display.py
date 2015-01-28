@@ -1,6 +1,6 @@
 from __future__ import print_function
 from __future__ import division
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from flask.ext.cache import Cache
 import redis
 import logging
@@ -10,6 +10,8 @@ import json
 import datetime
 import time
 from pprint import pprint
+from webargs import Arg
+from webargs.flaskparser import use_args, use_kwargs
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -46,6 +48,8 @@ def garages_for_company(company):
     return garages
 
 
+def sites_for_garage(garage):
+    return json.loads(r.hget("current", "data"))[garage]['stations']
 
 @app.route("/get_all_garage_data")
 def get_all():
@@ -121,10 +125,26 @@ def company(company_name):
         data=data,
         available=avails,
         time=datetime.datetime.fromtimestamp(json.loads(r.hget("current", "timestamp"))),
-        server_time=datetime.datetime.fromtimestamp(time.time())
+        server_time=datetime.datetime.fromtimestamp(round(time.time(),0))
     )
 
 
+user_args = {
+    'target': Arg(str, required=True),  # 400 error thrown if
+    # required argument is missing
+    # Repeated parameter, e.g. "/?nickname=Fred&nickname=Freddie"
+    'garages': Arg(str, multiple=True, required=True)
+}
+
+@app.route("/addsub")
+@use_args(user_args)
+def add_sub(user_args):
+    if "target" in request.args:
+        # We must be receiving the data
+        for garage_name in user_args['garages']:
+            for site in sites_for_garage(garage_name):
+                r.sadd(site,user_args['target'])
+    return render_template("addsub.html")
 
 if __name__ == "__main__":
     port = int(os.getenv('VCAP_APP_PORT', '5000'))
