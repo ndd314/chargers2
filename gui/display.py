@@ -11,7 +11,9 @@ import datetime
 import time
 from pprint import pprint
 from webargs import Arg
-from webargs.flaskparser import use_args, use_kwargs
+from webargs.flaskparser import use_args
+from datetime import timedelta
+from babel.dates import format_timedelta
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -83,6 +85,9 @@ def list_garage(use_json=True):
 
 @app.route("/")
 def index():
+    delta_val = int(json.loads(r.hget("current", "timestamp"))) - time.time()
+    delta = timedelta(seconds=delta_val)
+    how_old = format_timedelta(delta, add_direction=True)
 
     avails = {}
     for garage_name in list_garage(use_json=False):
@@ -92,12 +97,15 @@ def index():
         "index.html",
         data=json.loads(r.hget("current", "data")),
         available=avails,
-        time=datetime.datetime.fromtimestamp(json.loads(r.hget("current", "timestamp"))),
-        server_time=datetime.datetime.fromtimestamp(time.time())
+        time=how_old
     )
 
 @app.route("/garage/<garage_name>")
 def garage(garage_name):
+    delta_val = int(json.loads(r.hget("current", "timestamp"))) - time.time()
+    delta = timedelta(seconds=delta_val)
+    how_old = format_timedelta(delta, add_direction=True)
+
     avails = {}
     avails[garage_name] = garage_avail(garage_name, use_json=False)
 
@@ -105,13 +113,16 @@ def garage(garage_name):
         "index.html",
         data={garage_name: json.loads(r.hget("current", "data"))[garage_name]},
         available=avails,
-        time=datetime.datetime.fromtimestamp(json.loads(r.hget("current", "timestamp"))),
-        server_time = datetime.datetime.fromtimestamp(time.time())
+        time=how_old
     )
 
 
 @app.route("/company/<company_name>")
 def company(company_name):
+
+    delta_val = int(json.loads(r.hget("current", "timestamp"))) - time.time()
+    delta = timedelta(seconds=delta_val)
+    how_old = format_timedelta(delta,add_direction=True)
 
     avails = {}
     data = {}
@@ -124,8 +135,8 @@ def company(company_name):
         "index.html",
         data=data,
         available=avails,
-        time=datetime.datetime.fromtimestamp(json.loads(r.hget("current", "timestamp"))),
-        server_time=datetime.datetime.fromtimestamp(round(time.time(),0))
+        time=how_old
+
     )
 
 
