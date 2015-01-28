@@ -5,7 +5,7 @@ import json
 import requests
 
 
-
+logger = logging.getLogger()
 
 class Charger(object):
 
@@ -27,6 +27,9 @@ class Charger(object):
         for item in charger_dict.keys():
             self.__setattr__(item,charger_dict[item])
 
+    @property
+    def sname(self):
+        return self.station_name[1]
 
 class ChargePointConnection(object):
 
@@ -59,15 +62,21 @@ class ChargePointConnection(object):
         self._logged_in = auth.json()['auth']
 
 
-    def get_stations_info(self,url):
+    def get_stations_info(self,url,regex=None):
         """
 
         :param location: string
         :return: :rtype: list
         """
 
-        logging.debug("Getting Data  from " + url)
+        logger.debug("Getting Data  from " + url)
         while not self._logged_in:
             self._do_login()
         station_data = self._cpsession.get(url)
-        return json.loads(station_data.text)[0]['station_list']['summaries']
+        all_chargers = []
+        for charger in json.loads(station_data.text)[0]['station_list']['summaries']:
+            charger_obj = Charger(charger)
+            if regex in charger_obj.sname:
+                all_chargers.append(charger_obj)
+
+        return all_chargers

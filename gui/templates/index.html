@@ -27,37 +27,24 @@
     <div class="row">
         <div class="col-md-12">
             <div class="page-header">
-                <h1 class="text-center">Federation EV Status
-                    <br>
-                    <small>where can you charge your car?</small>
-                </h1>
+                <h3 class="text-center">federation ev status
+
+                </h3>
             </div>
         </div>
     </div>
     <div class="row">
         <div class="col-md-12 text-center"><p>
 
-            VMware:
-            {% for garage,data in vmware.items() %}
-            <div class="btn-group">
-            <a href="#" style="min-width: 90px" data-html="true" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="{{ "<br>".join(all_avail[garage]) }}"
-               class="active btn{% if data.avail_ports > 0 %} btn-success{%  else %} btn-danger {% endif %}">
-                {{ garage }}<br/>
-                {{ data.avail_ports }}</a>
-            </div>
-            {% endfor %}
-            <p>
-            EMC:
-                {% for garage,data in emc.items() %}
 
-            <div class="btn-group">
-                <a href="#" style="min-width: 90px" data-html="true" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="{{ "<br>".join(all_avail[garage]) }}"
-                   class="active btn{% if data.avail_ports > 0 %} btn-success{%  else %} btn-danger {% endif %}">
-                    {{ garage }}<br/>
-                    {{ data.avail_ports }}</a>
-            </div>
+            {% for garage_name,garage_data in data.items() %}
+                <div class="btn-group">
+                <a href="#" style="min-width: 110px" data-html="true" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="{{ '<br>'.join(available[garage_name]) }}"
+                   class="active btn{% if garage_data.available_ports > 0 %} btn-success{%  else %} btn-danger {% endif %}">
+                    {{ garage_name }}<br/>
+                    {{ garage_data.available_ports }}/{{ garage_data.total_ports }}</a>
+                </div><p>
             {% endfor %}
-
 
         </div>
     </div>
