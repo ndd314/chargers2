@@ -59,7 +59,7 @@ def store_to_redis(data):
 
 
     r.hset("current","data",string_data)
-    r.hset("current","timestamp", time.time())
+    r.hset("current","timestamp", round(time.time(),0))
 
     r.hset("previous", "data", old_data)
     r.hset("previous", "timestamp", old_ts)

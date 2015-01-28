@@ -7,6 +7,8 @@ import logging
 import os
 import anyconfig
 import json
+import datetime
+import time
 from pprint import pprint
 
 logger = logging.getLogger(__name__)
@@ -85,7 +87,9 @@ def index():
     return render_template(
         "index.html",
         data=json.loads(r.hget("current", "data")),
-        available=avails
+        available=avails,
+        time=datetime.datetime.fromtimestamp(json.loads(r.hget("current", "timestamp"))),
+        server_time=datetime.datetime.fromtimestamp(time.time())
     )
 
 @app.route("/garage/<garage_name>")
@@ -96,7 +100,9 @@ def garage(garage_name):
     return render_template(
         "index.html",
         data={garage_name: json.loads(r.hget("current", "data"))[garage_name]},
-        available=avails
+        available=avails,
+        time=datetime.datetime.fromtimestamp(json.loads(r.hget("current", "timestamp"))),
+        server_time = datetime.datetime.fromtimestamp(time.time())
     )
 
 
@@ -113,9 +119,11 @@ def company(company_name):
     return render_template(
         "index.html",
         data=data,
-        available=avails
+        available=avails,
+        time=datetime.datetime.fromtimestamp(json.loads(r.hget("current", "timestamp"))),
+        server_time=datetime.datetime.fromtimestamp(time.time())
     )
-    pass
+
 
 
 if __name__ == "__main__":
