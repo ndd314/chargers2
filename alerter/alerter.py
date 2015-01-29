@@ -50,6 +50,7 @@ def send_alert(address, garage):
         send_email(address, garage)
     elif is_phone(address):
         send_txt(address, garage)
+    clear_subs_for_user(address)
 
 
 def send_email(address, garage):
@@ -91,6 +92,12 @@ def find_changes():
 
     return stations_with_new_spots
 
+def clear_subs_for_user(target):
+    logger.debug("Clearing sub for user {}".format(target))
+    for key in r.keys("SUB-*"):
+        if r.type(key) == "set":
+            r.srem(key,target)
+            logger.debug("Removing user {} from subscription to {}".format(target,key))
 
 while True:
     for item in pubsub.listen():
@@ -98,10 +105,8 @@ while True:
             logger.debug("received alert of new info with timstamp {}".format(item['data']))
             for station in find_changes():
                 logger.info("Found new station {}...checking for subscriptions".format(station))
-                if len(r.smembers(station)) == 0:
+                if len(r.smembers("SUB-{}".format(station))) == 0:
                     logger.info("No notifications to send for station {}".format(station))
-                for target in r.smembers(station):
+                for target in r.smembers("SUB-{}".format(station)):
                     logger.info("Found member to notifify for {}: {}".format(station, target))
                     send_alert(target, "{}".format(station))
-                logger.debug("Deleting all subscriptions for station: ".format(station))
-                r.delete(station)

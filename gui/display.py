@@ -28,7 +28,8 @@ r = redis.Redis(
 )
 
 app = Flask(__name__)
-app.debug = True
+app.debug = False
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 def find_avail(garage_name):
     current = json.loads(r.hget("current", "data"))
@@ -83,6 +84,8 @@ def list_garage(use_json=True):
     else:
         return json.loads(r.hget("current", "data")).keys()
 
+
+@cache.cached(timeout=300)
 @app.route("/")
 def index():
     delta_val = int(json.loads(r.hget("current", "timestamp"))) - time.time()
@@ -154,8 +157,13 @@ def add_sub(user_args):
         # We must be receiving the data
         for garage_name in user_args['garages']:
             for site in sites_for_garage(garage_name):
-                r.sadd(site,user_args['target'])
+                r.sadd("SUB-{}".format(site),user_args['target'])
+    return render_template("addsub.html", message="Accepted Subscription")
+
+@app.route("/sub")
+def sub():
     return render_template("addsub.html")
+
 
 if __name__ == "__main__":
     port = int(os.getenv('VCAP_APP_PORT', '5000'))
