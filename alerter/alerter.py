@@ -1,18 +1,23 @@
+import logging
+
+logging.basicConfig(format='%(asctime)s: %(levelname)s %(module)s:%(funcName)s | %(message)s', level=logging.DEBUG)
+
 import anyconfig
 from twilio.rest import TwilioRestClient
 import sendgrid
 import redis
 from pprint import pprint
-import logging
+
 import re
 import json
+import newrelic.agent
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+newrelic.agent.initialize('newrelic.ini')
+application = newrelic.agent.register_application(timeout=10.0)
+
 
 credentials = anyconfig.load("private_config.json")['credentials']
 garage_data = anyconfig.load("private_config.json")['garage_data']
-
 
 twilio_client = TwilioRestClient(
     credentials['Twilio']['account_sid'],
@@ -45,6 +50,7 @@ def is_phone(address):
     return pattern.match(address) is not None
 
 
+@newrelic.agent.background_task()
 def send_alert(address, garage):
     if is_email(address):
         send_email(address, garage)
@@ -53,8 +59,9 @@ def send_alert(address, garage):
     clear_subs_for_user(address)
 
 
+@newrelic.agent.background_task()
 def send_email(address, garage):
-    logger.info("Sending email about {} to {}".format(garage, address))
+    logging.info("Sending email about {} to {}".format(garage, address))
     message = sendgrid.Mail()
     message.add_to(address)
     message.set_subject("{} has a new spot open, Hurry!".format(garage))
@@ -64,8 +71,9 @@ def send_email(address, garage):
     sg.send(message)
 
 
+@newrelic.agent.background_task()
 def send_txt(address, garage):
-    logger.info("Sending txt about {} to {}".format(garage, address))
+    logging.info("Sending txt about {} to {}".format(garage, address))
     twilio_client.messages.create(
         to=address,
         from_="+16504092352",
@@ -73,6 +81,7 @@ def send_txt(address, garage):
     )
 
 
+@newrelic.agent.background_task()
 def find_changes():
     current = json.loads(r.hget("current","data"))
     previous = json.loads(r.hget("previous","data"))
@@ -92,21 +101,29 @@ def find_changes():
 
     return stations_with_new_spots
 
+
+@newrelic.agent.background_task()
 def clear_subs_for_user(target):
-    logger.debug("Clearing sub for user {}".format(target))
+    logging.debug("Clearing sub for user {}".format(target))
     for key in r.keys("SUB-*"):
         if r.type(key) == "set":
             r.srem(key,target)
-            logger.debug("Removing user {} from subscription to {}".format(target,key))
+            logging.debug("Removing user {} from subscription to {}".format(target,key))
 
-while True:
+
+@newrelic.agent.background_task()
+def main_loop():
     for item in pubsub.listen():
         if item['type'] == "message":
-            logger.debug("received alert of new info with timstamp {}".format(item['data']))
+            logging.debug("received alert of new info with timstamp {}".format(item['data']))
             for station in find_changes():
-                logger.info("Found new station {}...checking for subscriptions".format(station))
+                logging.info("Found new station {}...checking for subscriptions".format(station))
                 if len(r.smembers("SUB-{}".format(station))) == 0:
-                    logger.info("No notifications to send for station {}".format(station))
+                    logging.info("No notifications to send for station {}".format(station))
                 for target in r.smembers("SUB-{}".format(station)):
-                    logger.info("Found member to notifify for {}: {}".format(station, target))
+                    logging.info("Found member to notifify for {}: {}".format(station, target))
                     send_alert(target, "{}".format(station))
+
+
+if __name__ == "__main__":
+    main_loop()

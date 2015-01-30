@@ -1,9 +1,13 @@
 from __future__ import print_function
 from __future__ import division
+
+import logging
+logging.basicConfig(format='%(asctime)s: %(levelname)s %(module)s:%(funcName)s | %(message)s', level=logging.DEBUG)
+
 from flask import Flask, render_template, jsonify, request
 from flask.ext.cache import Cache
 import redis
-import logging
+
 import os
 import anyconfig
 import json
@@ -14,9 +18,11 @@ from webargs import Arg
 from webargs.flaskparser import use_args
 from datetime import timedelta
 from babel.dates import format_timedelta
+import newrelic.agent
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+newrelic.agent.initialize('newrelic.ini')
+
+
 
 credentials = anyconfig.load("private_config.json")['credentials']
 garage_data = anyconfig.load("private_config.json")['garage_data']
