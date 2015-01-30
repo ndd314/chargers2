@@ -3,3 +3,4 @@ anyconfig
 sendgrid
 twilio
 newrelic
+splunk_logger

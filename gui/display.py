@@ -2,14 +2,29 @@ from __future__ import print_function
 from __future__ import division
 
 import logging
-logging.basicConfig(format='%(asctime)s: %(levelname)s %(module)s:%(funcName)s | %(message)s', level=logging.DEBUG)
+import anyconfig
+from splunk_logger import SplunkLogger
+
+credentials = anyconfig.load("private_config.json")['credentials']
+
+splunk_logger = SplunkLogger(access_token=credentials['Splunk']['access_token'],
+                             project_id=credentials['Splunk']['project_id'],
+                             api_domain=credentials['Splunk']['hostname'])
+logger = logging.getLogger('')
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger.addHandler(splunk_logger)
+
+logging.getLogger("newrelic").setLevel(logging.INFO)
+logging.getLogger("anyconfig").setLevel(logging.INFO)
+
 
 from flask import Flask, render_template, jsonify, request
 from flask.ext.cache import Cache
 import redis
 
 import os
-import anyconfig
+
 import json
 import datetime
 import time
@@ -20,11 +35,13 @@ from datetime import timedelta
 from babel.dates import format_timedelta
 import newrelic.agent
 
+
+
 newrelic.agent.initialize('newrelic.ini')
 
 
 
-credentials = anyconfig.load("private_config.json")['credentials']
+
 garage_data = anyconfig.load("private_config.json")['garage_data']
 
 r = redis.Redis(

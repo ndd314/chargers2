@@ -1,14 +1,29 @@
 from __future__ import print_function
 
 import logging
+import anyconfig
+from splunk_logger import SplunkLogger
 
-logging.basicConfig(format='%(asctime)s: %(levelname)s %(module)s:%(funcName)s | %(message)s', level=logging.DEBUG)
+credentials = anyconfig.load("private_config.json")['credentials']
+
+splunk_logger = SplunkLogger(access_token=credentials['Splunk']['access_token'],
+                             project_id=credentials['Splunk']['project_id'],
+                             api_domain=credentials['Splunk']['hostname'])
+
+
+logger = logging.getLogger('')
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger.addHandler(splunk_logger)
+
+logging.getLogger("newrelic").setLevel(logging.INFO)
+logging.getLogger("anyconfig").setLevel(logging.INFO)
 
 from ChargePoint import Charger, ChargePointConnection
 
 
 
-import anyconfig
+
 import copy
 import redis
 import json
@@ -38,9 +53,9 @@ def get_current():
 
     local_garage_data = copy.deepcopy(garage_data)
     for garage_name, garage_info in local_garage_data.iteritems():
-        logging.debug("Starting with garage {}".format(garage_name))
+        logger.debug("Starting with garage {}".format(garage_name))
         for charger in cp.get_stations_info(garage_info['url'], regex=garage_info['regex']):
-            logging.debug("Processing: {}:{}".format(garage_name,charger.sname))
+            logger.debug("Processing: {}:{}".format(garage_name,charger.sname))
             local_garage_data[garage_name]['stations'][charger.sname] = charger.port_count["available"]
             if 'available_ports' in local_garage_data[garage_name]:
                 local_garage_data[garage_name][u'available_ports'] += charger.port_count["available"]
@@ -51,7 +66,7 @@ def get_current():
 
 @newrelic.agent.background_task()
 def store_to_redis(data):
-    logging.info("Updatng data and swapping current for previous in Redis store")
+    logger.info("Updatng data and swapping current for previous in Redis store")
     string_data = json.dumps(data)
 
     old_ts = r.hget("current","timestamp")
@@ -64,7 +79,7 @@ def store_to_redis(data):
     r.hset("previous", "data", old_data)
     r.hset("previous", "timestamp", old_ts)
 
-    logging.info("Publishing a message to the {} channel".format(credentials['Redis']['channel']))
+    logger.info("Publishing a message to the {} channel".format(credentials['Redis']['channel']))
     r.publish(credentials['Redis']['channel'],r.hget("current","timestamp"))
 
 if __name__ == "__main__":

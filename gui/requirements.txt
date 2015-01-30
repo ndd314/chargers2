@@ -10,3 +10,4 @@ anyconfig
 webargs
 babel
 newrelic
+splunk_logger
