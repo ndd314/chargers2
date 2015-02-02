@@ -1,3 +1,2 @@
-* Support splunk logging
+
 * Figure out a better way for the config - maybe JSON in env variables?
-* Push perf data to new relic
