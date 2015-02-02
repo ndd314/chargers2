@@ -7,7 +7,7 @@ credentials = anyconfig.load("private_config.json")['credentials']
 logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-loggly_handler = loggly.handlers.HTTPSHandler(url=credentials["Loggly"]["url"])
+loggly_handler = loggly.handlers.HTTPSHandler(url="{}{}".format(credentials["Loggly"]["url"], "alerter"))
 loggly_handler.setLevel(logging.DEBUG)
 logger.addHandler(loggly_handler)
 logging.getLogger("newrelic").setLevel(logging.INFO)
