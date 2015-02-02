@@ -1,19 +1,19 @@
 import logging
 import anyconfig
-from splunk_logger import SplunkLogger
+import loggly.handlers
 
 credentials = anyconfig.load("private_config.json")['credentials']
 
-splunk_logger = SplunkLogger(access_token=credentials['Splunk']['access_token'],
-                             project_id=credentials['Splunk']['project_id'],
-                             api_domain=credentials['Splunk']['hostname'])
 logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger.addHandler(splunk_logger)
-
+loggly_handler = loggly.handlers.HTTPSHandler(url=credentials["Loggly"]["url"])
+loggly_handler.setLevel(logging.DEBUG)
+logger.addHandler(loggly_handler)
 logging.getLogger("newrelic").setLevel(logging.INFO)
 logging.getLogger("anyconfig").setLevel(logging.INFO)
+logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(logging.INFO)
+
 
 from twilio.rest import TwilioRestClient
 import sendgrid

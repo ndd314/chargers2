@@ -2,21 +2,23 @@ from __future__ import print_function
 from __future__ import division
 
 import logging
+import loggly.handlers
 import anyconfig
-from splunk_logger import SplunkLogger
+
 
 credentials = anyconfig.load("private_config.json")['credentials']
 
-splunk_logger = SplunkLogger(access_token=credentials['Splunk']['access_token'],
-                             project_id=credentials['Splunk']['project_id'],
-                             api_domain=credentials['Splunk']['hostname'])
+
+
 logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger.addHandler(splunk_logger)
-
+loggly_handler = loggly.handlers.HTTPSHandler(url=credentials["Loggly"]["url"])
+loggly_handler.setLevel(logging.DEBUG)
+logger.addHandler(loggly_handler)
 logging.getLogger("newrelic").setLevel(logging.INFO)
 logging.getLogger("anyconfig").setLevel(logging.INFO)
+logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(logging.INFO)
 
 
 from flask import Flask, render_template, jsonify, request
@@ -35,10 +37,7 @@ from datetime import timedelta
 from babel.dates import format_timedelta
 import newrelic.agent
 
-# from apscheduler.schedulers.background import BackgroundScheduler
-#
-# scheduler = BackgroundScheduler()
-# scheduler.start()
+
 
 
 newrelic.agent.initialize('newrelic.ini')
@@ -52,6 +51,10 @@ r = redis.Redis(
 
 app = Flask(__name__)
 app.debug = False
+
+
+
+
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 def find_avail(garage_name):
@@ -76,6 +79,7 @@ def garages_for_company(company):
 
 def sites_for_garage(garage):
     return hget("current", "data")[garage]['stations']
+
 
 
 @cache.memoize(300)
