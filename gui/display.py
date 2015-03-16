@@ -46,7 +46,8 @@ garage_data = anyconfig.load("private_config.json")['garage_data']
 r = redis.Redis(
     host=credentials['Redis']['server'],
     db=credentials['Redis']['database'],
-    password=credentials['Redis']['password']
+    password=credentials['Redis']['password'],
+    port=credentials['Redis']['port']
 )
 
 app = Flask(__name__)

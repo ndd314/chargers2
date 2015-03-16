@@ -56,3 +56,4 @@ target/
 .idea/
 private_config.json
 newrelic.ini
+.DS_Store

@@ -41,7 +41,8 @@ cp = ChargePointConnection(credentials['ChargePoint']['user'],
 r = redis.Redis(
     host=credentials['Redis']['server'],
     db=credentials['Redis']['database'],
-    password=credentials['Redis']['password']
+    password=credentials['Redis']['password'],
+    port=credentials['Redis']['port']
 )
 
 
