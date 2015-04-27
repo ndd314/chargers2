@@ -1,6 +1,8 @@
 import logging
 import anyconfig
 import loggly.handlers
+from keen.client import KeenClient
+
 
 credentials = anyconfig.load("private_config.json")['credentials']
 
@@ -39,6 +41,13 @@ twilio_client = TwilioRestClient(
 sg = sendgrid.SendGridClient(
     credentials['SendGrid']['user'],
     credentials['SendGrid']['password']
+)
+
+keen_client = KeenClient(
+        project_id=credentials['Keen']['project_id'],
+        write_key=credentials['Keen']['write_key'],
+        read_key=credentials['Keen']['read_key'],
+        master_key=credentials['Keen']['master_key']
 )
 
 r = redis.Redis(
@@ -111,6 +120,17 @@ def find_changes():
     for station_name in cur_stations.keys():
         if cur_stations[station_name] > prev_stations[station_name]:
             stations_with_new_spots.append(station_name)
+
+    all_changes = {}
+    for station_name in cur_stations.keys():
+        if cur_stations[station_name] != prev_stations[station_name]:
+            all_changes[station_name] = cur_stations[station_name]
+
+
+    if len(all_changes) > 0:
+        keen_client.add_event("chargers",
+                            all_changes
+                            )
 
     return stations_with_new_spots
 

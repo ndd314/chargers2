@@ -4,3 +4,4 @@ sendgrid
 twilio
 newrelic
 loggly-handler
+keen
