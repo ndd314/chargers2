@@ -31,8 +31,6 @@ import json
 import datetime
 import time
 from pprint import pprint
-from webargs import Arg
-from webargs.flaskparser import use_args
 from datetime import timedelta
 from babel.dates import format_timedelta
 import newrelic.agent
@@ -176,29 +174,7 @@ def company(company_name):
     )
 
 
-user_args = {
-    'target': Arg(str, required=True),  # 400 error thrown if
-    # required argument is missing
-    # Repeated parameter, e.g. "/?nickname=Fred&nickname=Freddie"
-    'garages': Arg(str, multiple=True, required=True)
-}
-
-@app.route("/addsub")
-@use_args(user_args)
-def add_sub(user_args):
-    if "target" in request.args:
-        # We must be receiving the data
-        for garage_name in user_args['garages']:
-            for site in sites_for_garage(garage_name):
-                r.sadd("SUB-{}".format(site),user_args['target'])
-    return render_template("addsub.html", message="Accepted Subscription")
-
-@app.route("/sub")
-def sub():
-    return render_template("addsub.html")
-
-
 if __name__ == "__main__":
-    port = int(os.getenv('VCAP_APP_PORT', '5000'))
+    port = int(os.getenv('PORT', '5000'))
     logging.info("Running on port {}".format(port))
     app.run(host='0.0.0.0', port=port)

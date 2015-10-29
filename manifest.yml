@@ -19,7 +19,7 @@ applications:
 - name: chargersv2-gui
   memory: 64M
   instances: 1
-  host: chargers2
+  host: chargers
   path: ./gui
   buildpack: python_buildpack
   command: python display.py

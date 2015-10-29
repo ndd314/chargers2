@@ -7,7 +7,6 @@ itsdangerous==0.24
 redis==2.10.3
 wsgiref==0.1.2
 anyconfig
-webargs
 babel
 newrelic
 loggly-handler
