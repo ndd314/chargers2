@@ -28,7 +28,7 @@ query_params = {
    "f_l1" : "false",
    "f_estimate" : "false",
    "f_fee" : "true",
-   "f_free" : "true",
+   "f_free" : "false", # VMware stations are not free (free for first 4 hours, then $7/hour).
    "f_reservable" : "false",
    "f_shared" : "true",
    "driver_connected_station_only" : "false",
