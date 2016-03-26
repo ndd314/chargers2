@@ -9,14 +9,14 @@ credentials = anyconfig.load("private_config.json")['credentials']
 logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-loggly_handler = loggly.handlers.HTTPSHandler(url="{}{}".format(credentials["Loggly"]["url"], "collector"))
+loggly_handler = loggly.handlers.HTTPSHandler(url="{}{}".format(credentials["Loggly"]["url"], "workers"))
 loggly_handler.setLevel(logging.DEBUG)
 logger.addHandler(loggly_handler)
 logging.getLogger("newrelic").setLevel(logging.INFO)
 logging.getLogger("anyconfig").setLevel(logging.INFO)
 logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(logging.INFO)
 
-from ChargePoint import Charger, ChargePointConnection
+from changepoint import Charger, ChargePointConnection
 
 
 
@@ -41,8 +41,8 @@ cp = ChargePointConnection(credentials['ChargePoint']['user'],
 r = redis.Redis(
     host=credentials['Redis']['server'],
     db=credentials['Redis']['database'],
-    password=credentials['Redis']['password'],
-    port=credentials['Redis']['port']
+    # password=credentials['Redis']['password'],
+    # port=credentials['Redis']['port']
 )
 
 
@@ -51,6 +51,7 @@ def get_current():
 
     local_garage_data = copy.deepcopy(garage_data)
     for garage_name, garage_info in local_garage_data.iteritems():
+        local_garage_data[garage_name][u'available_ports'] = 0
         logger.debug("Starting with garage {}".format(garage_name))
         for charger in cp.get_stations_info(garage_info['url'], regex=garage_info['regex']):
             logger.debug("Processing: {}:{}".format(garage_name,charger.sname))
@@ -83,4 +84,4 @@ def store_to_redis(data):
 if __name__ == "__main__":
     while True:
         store_to_redis(get_current())
-        time.sleep(60)
+        time.sleep(300)

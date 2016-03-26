@@ -1,7 +1,0 @@
-anyconfig
-loggly-handler
-newrelic
-pytest
-redis==2.10.3
-requests
-sure

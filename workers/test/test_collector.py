@@ -1,4 +1,4 @@
-from collector.collector import *
+from workers.collector import *
 
 import pytest
 import sure
