@@ -37,7 +37,7 @@
         <div class="col-md-12"><p>
 
             <h3>{{ message }}</h3>
-            <form class="form-horizontal" action="/addsub">
+            <form class="form-horizontal" action="/addsub" method="post">
                 <fieldset>
 
                     <!-- Form Name -->
@@ -75,22 +75,11 @@
                                        type="checkbox">
                                 Central
                             </label>
-                            <label class="checkbox" for="garages-3">
-                                <input name="garages" id="garages-3" value="DPAD"  type="checkbox">
-                                DPAD
-                            </label>
-                            <label class="checkbox" for="garages-4">
-                                <input name="garages" id="garages-4" value="Santa Clara"
-                                       type="checkbox">
-                                Santa Clara
-                            </label>
                         </div>
                     </div>
 
                     <!-- Button -->
                     <div class="control-group">
-                        <label class="control-label" for="submit">Submit</label>
-
                         <div class="controls">
                             <button id="submit" name="submit" class="btn btn-primary">Submit</button>
                         </div>
@@ -110,29 +99,7 @@
 
 </div>
 
-
-<script>
-    (function (i, s, o, g, r, a, m) {
-        i['GoogleAnalyticsObject'] = r;
-        i[r] = i[r] || function () {
-            (i[r].q = i[r].q || []).push(arguments)
-        }, i[r].l = 1 * new Date();
-        a = s.createElement(o),
-                m = s.getElementsByTagName(o)[0];
-        a.async = 1;
-        a.src = g;
-        m.parentNode.insertBefore(a, m)
-    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
-
-    ga('create', 'UA-52370800-1', 'auto');
-    ga('require', 'displayfeatures');
-    ga('send', 'pageview');
-
-    $(function () {
-        $("[data-toggle='tooltip']").tooltip();
-    });
-
-</script>
+{{ analytics }}
 
 </body>
 

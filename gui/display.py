@@ -22,6 +22,10 @@ import newrelic.agent
 #TODO add logging again if neccessary
 #TODO configure newrelic agent again
 
+logger = logging.getLogger('')
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
 garage_data = anyconfig.load("garage_data.json")['garage_data']
 r = redis.from_url(REDIS_URL)
 
@@ -147,6 +151,20 @@ def company(company_name):
       time=how_old
    )
 
+@app.route("/addsub", methods=['POST', 'GET'])
+def addsub_get():
+   if request.method == 'GET':
+      return render_template("addsub.html")
+   else:
+      #TODO validate inputs
+      target = request.form.get('target')
+      garages = request.form.getlist('garages')
+
+      for garage in garages:
+         r.sadd("SUB-{}".format(garage), target)
+
+      message = "Subscribed to {}".format(garages)
+      return render_template("addsub.html", message=message)
 
 if __name__ == "__main__":
    port = int(os.getenv('PORT', '5000'))
