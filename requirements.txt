@@ -1,0 +1,21 @@
+anyconfig
+babel
+Flask
+Flask-Cache
+keen
+loggly-handler
+newrelic
+redis
+requests
+sendgrid
+twilio
+
+Jinja2
+MarkupSafe
+Werkzeug
+itsdangerous
+wsgiref
+
+# test
+pytest
+sure

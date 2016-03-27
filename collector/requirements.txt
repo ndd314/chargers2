@@ -1,5 +1,0 @@
-redis==2.10.3
-requests==2.5.1
-anyconfig
-newrelic
-loggly-handler

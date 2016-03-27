@@ -1,7 +1,0 @@
-redis==2.10.3
-anyconfig
-sendgrid
-twilio
-newrelic
-loggly-handler
-keen

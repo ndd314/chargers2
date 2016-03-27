@@ -1,0 +1,8 @@
+---
+applications:
+- name: chargersv2-placeholder
+  memory: 64M
+  no-route: false
+  instances: 1
+  buildpack: staticfile_buildpack
+  host: chargers
