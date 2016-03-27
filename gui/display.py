@@ -29,7 +29,7 @@ app = Flask(__name__)
 Analytics(app)
 app.debug = False
 
-app.config['GOOGLE_ANALYTICS']['ACCOUNT'] = GOOGLE_ANALYTICS_SITE_ID
+app.config['ANALYTICS']['GOOGLE_ANALYTICS']['ACCOUNT'] = GOOGLE_ANALYTICS_SITE_ID
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 
