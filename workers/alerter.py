@@ -78,8 +78,7 @@ def send_email(address, garage):
    message.add_to(address)
    message.set_subject("{} has a new spot open, Hurry!".format(garage))
    message.set_text("Go get it!") #todo add how many spots are there
-   message.set_from("matt@cowger.us")
-   message.set_from_name("Chargers App")
+   message.set_from(SENDGRID_EMAIL_FROM)
    sg.send(message)
 
 

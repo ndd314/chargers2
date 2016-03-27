@@ -8,3 +8,4 @@ GOOGLE_ANALYTICS_SITE_ID = os.environ.get('GOOGLE_ANALYTICS_SITE_ID')
 
 SENDGRID_USERNAME = os.environ.get('SENDGRID_USERNAME')
 SENDGRID_PASSWORD = os.environ.get('SENDGRID_PASSWORD')
+SENDGRID_EMAIL_FROM = os.environ.get('SENDGRID_EMAIL_FROM', 'VMware ChargePoint <vmwarechargepoint@gmail.com>')
