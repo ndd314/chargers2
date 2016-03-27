@@ -1,11 +1,13 @@
 language: python
-
 python:
-  - "2.7"
-
-install: "pip install -r requirements_test.txt"
-
+- '2.7'
+install: pip install -r requirements_test.txt
 script: PYTHONPATH=. py.test
-
 env:
-  global:
+  global: 
+deploy:
+  app:
+    master: vmwarechargepoint
+  provider: heroku
+  api_key:
+    secure: fEoIdO9F+AkD+MkhcnAuWOIF59dIbyVq4FXuHErwlv9z3rF3Wk3n5bDS5wBtSyUnQpoHgWThRQ+Ln1lmkN881hHUNJ4C7f0pnL8CCJV2Jh0MGR9DDccOoWRJKaW6nZVFlZq7Ze3L9Pc+Z/ksdLflYdt490sAOyIWs3/oNPQ/0/+Ys34KxMYiWIGFnw7pIwp6xRaLXdUrMNBL+EGhyaJdSTricbPimocpeSvkaBcBLNF98k6FCoofbN5te4tD5fY+Xsm2qOuhP1Hx3tqPBuC5n84my3VRxkut8s6Tdzt9q8jjFjh/oRDsKUIjgIYP4z89T089N/bJJ8wgsaojIa89rIy9mGshw2asZv/HW1epFuIIxVW9SMFv2yI0QV8pDhMcqFzxQDA47rZUFyeEmOULinOGVBxe0x3l4vlYjCC/hcp03AyC1RjiqIJWZ4xYk5Ir5Pm9fZHEk9GGzR+YrD1iY2WH9XgRuB2wAtthrqODDNAH4pDAVNHVe0PN7uUBOrzuhoc6iT6ZmZnPhmMCGET48KiwLKwNLJu5o8l4w0ZffzoEJzR2nlttr+zSy4ldUx2pS7xwrh9fzKBSsJMMTprPv+s8ZlvKF/Lf6UCVSE5m/GppbnNUFcXipwZx/+TmaBaBq2jAOUfZHDhSXdiVwTtpwz6pwiSxv4c80kan1sa+HOE=
