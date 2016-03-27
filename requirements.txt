@@ -1,20 +1,20 @@
 anyconfig
 babel
-Flask==0.10.1
-Flask-Cache==0.13.1
+Flask
+Flask-Cache
 keen
 loggly-handler
 newrelic
-redis==2.10.3
+redis
 requests
 sendgrid
 twilio
 
-Jinja2==2.7.3
-MarkupSafe==0.23
-Werkzeug==0.9.6
-itsdangerous==0.24
-wsgiref==0.1.2
+Jinja2
+MarkupSafe
+Werkzeug
+itsdangerous
+wsgiref
 
 # test
 pytest
