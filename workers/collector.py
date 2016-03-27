@@ -62,7 +62,7 @@ def store_to_redis(data):
     r.hset("previous", "timestamp", old_ts)
 
     # logger.info("Publishing a message to the {} channel".format(credentials['Redis']['channel']))
-    r.publish(credentials['Redis']['channel'],r.hget("current","timestamp"))
+    r.publish(REDIS_CHANNEL,r.hget("current","timestamp"))
 
 if __name__ == "__main__":
     while True:
