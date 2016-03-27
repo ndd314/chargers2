@@ -3,6 +3,7 @@ import anyconfig
 import loggly.handlers
 from keen.client import KeenClient  # TODO is this a mixpanel thing?
 from config import *
+from easy_sms import EasySms
 
 logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
@@ -85,11 +86,13 @@ def send_email(address, garage):
 @newrelic.agent.background_task()
 def send_txt(address, garage):
    logging.info("Sending txt about {} to {}".format(garage, address))
-   #TODO find another SMS service
+   body = "{} has a new spot open. Hurry!".format(garage),
+   EasySms.send_sms(to=address, body=body)
+
    # twilio_client.messages.create(
    #     to=address,
    #     from_="+16504092352",
-   #     body="{} has a new spot open. Hurry!".format(garage),
+   #     body=body
    # )
 
 
