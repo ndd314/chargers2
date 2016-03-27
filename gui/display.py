@@ -7,6 +7,7 @@ import anyconfig
 
 from flask import Flask, render_template, jsonify, request
 from flask.ext.cache import Cache
+from flask_analytics import Analytics
 import redis
 import os
 import json
@@ -25,8 +26,10 @@ garage_data = anyconfig.load("garage_data.json")['garage_data']
 r = redis.from_url(REDIS_URL)
 
 app = Flask(__name__)
+Analytics(app)
 app.debug = False
 
+app.config['GOOGLE_ANALYTICS']['ACCOUNT'] = GOOGLE_ANALYTICS_SITE_ID
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 

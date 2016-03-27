@@ -2,6 +2,7 @@ anyconfig
 babel
 Flask
 Flask-Cache
+Flask-Analytics
 keen
 loggly-handler
 newrelic
