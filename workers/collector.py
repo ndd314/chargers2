@@ -33,12 +33,7 @@ garage_data = anyconfig.load("private_config.json")['garage_data']
 
 cp = ChargePointConnection(CHARGEPOINT_USERNAME, CHARGEPOINT_PASSWORD)
 
-r = redis.Redis(
-    host=credentials['Redis']['server'],
-    db=credentials['Redis']['database'],
-    # password=credentials['Redis']['password'],
-    # port=credentials['Redis']['port']
-)
+r = redis.from_url(REDIS_URL)
 
 @newrelic.agent.background_task()
 def get_current():

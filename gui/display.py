@@ -1,32 +1,29 @@
 from __future__ import print_function
 from __future__ import division
+from config import *
 
 import logging
 import loggly.handlers
 import anyconfig
 
-
 credentials = anyconfig.load("private_config.json")['credentials']
-
-
 
 logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
 loggly_handler = loggly.handlers.HTTPSHandler(url="{}{}".format(credentials["Loggly"]["url"],"gui"))
 loggly_handler.setLevel(logging.DEBUG)
 logger.addHandler(loggly_handler)
+
 logging.getLogger("newrelic").setLevel(logging.INFO)
 logging.getLogger("anyconfig").setLevel(logging.INFO)
 logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(logging.INFO)
 
-
 from flask import Flask, render_template, jsonify, request
 from flask.ext.cache import Cache
 import redis
-
 import os
-
 import json
 import datetime
 import time
@@ -35,24 +32,13 @@ from datetime import timedelta
 from babel.dates import format_timedelta
 import newrelic.agent
 
-
-
-
 newrelic.agent.initialize('newrelic.ini')
 garage_data = anyconfig.load("private_config.json")['garage_data']
 
-r = redis.Redis(
-    host=credentials['Redis']['server'],
-    db=credentials['Redis']['database'],
-    password=credentials['Redis']['password'],
-    port=credentials['Redis']['port']
-)
+r = redis.from_url(REDIS_URL)
 
 app = Flask(__name__)
 app.debug = False
-
-
-
 
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
@@ -78,8 +64,6 @@ def garages_for_company(company):
 
 def sites_for_garage(garage):
     return hget("current", "data")[garage]['stations']
-
-
 
 @cache.memoize(300)
 def hget(which,key):

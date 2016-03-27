@@ -50,12 +50,8 @@ keen_client = KeenClient(
         master_key=credentials['Keen']['master_key']
 )
 
-r = redis.Redis(
-    host=credentials['Redis']['server'],
-    db=credentials['Redis']['database'],
-    password=credentials['Redis']['password'],
-    port=credentials['Redis']['port']
-)
+r = redis.from_url(REDIS_URL)
+
 pubsub = r.pubsub()
 pubsub.subscribe("alert")
 
