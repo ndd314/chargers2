@@ -1,2 +1,2 @@
 web: python gui/display.py
-worker: python workers/collector.py
+worker: PYTHONPATH=. python workers/collector.py
