@@ -16,3 +16,8 @@ MarkupSafe
 Werkzeug
 itsdangerous
 wsgiref
+
+# test
+pytest
+sure
+vcrpy

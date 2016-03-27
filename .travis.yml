@@ -1,8 +1,11 @@
 language: python
+
 python:
   - "2.7"
-install: "pip install -r requirements.txt"
+
+install: "pip install -r requirements_test.txt"
+
 script: PYTHONPATH=. py.test
+
 env:
   global:
-    secure: DkhUVL9R4nPT/ubRQtlrDaYnAfpT1G+8rcjklqEcjc9kPqUI8qTk/q60d/hLjPYdbWHvRKfCFIKzGEej8qf5gA2aAeGQ2KLHYzgC/Q8DTgUujF3XImiRh6ZhTaPVGCLSvIsCBflUUltBZMZNxGMNukz8K2mz08kmEsDPZd6SE6hXwLOvaU21GS52A7Jhqnt52ggFDbnVxlYAURKwTAcvnNOTgGZH90GC1BzS3xch76EUBFUKdAmW9dHronOgBBZjCe20VygBpgAP5jPZ2Q49u7ZGX+eUZ8QavFGLszbar6i8goTizmTnfJ2JDLi32yXtUvsKKQG8Y9wsDQ7LQ5ponc12k9WkDdBFZLIG5VSdJxMhMw8aVnEB7XGuVI0wfhuYeG1Az8hpacpxPuJYl1Tjp/syEt1loI6AWDcU+QcsfHLnlNAlnht3Dc+r09/ph/L94ttRt9PA0iIF6rzuLR6pTdm0znpxiOiQo2dAwY7kIceeaDgs5EghyhmmHYRqMfjP61HCxiarHZswD3EHugcd3xKEky1xRT1OjpaaBxqsYVm8pW2HaEd4iaSWKOvpPEB3iI3oezc+J8bIaH3Se5mjJfOYS0rjX1xG/ole/+bEBMZPLyUlbZuxQTX4eXoSSEDuRtZMbE5v6azAkKcEExDyh3nweiHYrhlU5b5ies2gNzg=

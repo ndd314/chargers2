@@ -1,0 +1,94 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['41']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [python-requests/2.9.1]
+    method: POST
+    uri: https://na.chargepoint.com/users/validate
+  response:
+    body: {string: !!python/unicode '{"auth":true,"redirect_url":"\/"}'}
+    headers:
+      connection: [keep-alive]
+      content-length: ['33']
+      content-type: [text/html; charset=UTF-8]
+      date: ['Sun, 27 Mar 2016 09:43:35 GMT']
+      server: [nginx]
+      set-cookie: ['ci_ui_session=17ab94ff9daf9673aea3969bb1b5bcbe; expires=Sun, 27-Mar-2016
+          11:43:34 GMT; path=/; domain=chargepoint.com; secure; httponly']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Cookie: [ci_ui_session=17ab94ff9daf9673aea3969bb1b5bcbe]
+      User-Agent: [python-requests/2.9.1]
+    method: GET
+    uri: https://na.chargepoint.com/dashboard/getChargeSpots?ne_lng=-122.116444173&f_free=false&sw_lng=-122.159552636&f_l2=true&f_cp=true&f_available=true&sw_lat=37.3941993727&f_inuse=true&ne_lat=37.4044272395
+  response:
+    body:
+      string: !!binary |
+        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
+        f0eQu/ytcTX17f+1trPlfzuvXPztegAA
+    headers:
+      connection: [keep-alive]
+      content-encoding: [gzip]
+      content-type: [text/html]
+      date: ['Sun, 27 Mar 2016 09:43:36 GMT']
+      server: [nginx]
+      set-cookie: ['ci_ui_session=17ab94ff9daf9673aea3969bb1b5bcbe; expires=Sun, 27-Mar-2016
+          11:43:35 GMT; path=/; domain=chargepoint.com; secure; httponly']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-frame-options: [SAMEORIGIN]
+    status: {code: 200, message: OK}
+version: 1
