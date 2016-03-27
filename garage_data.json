@@ -30,19 +30,6 @@
         "PG1-STATION 18": ""
       }
     },
-    "DPAD": {
-      "regex": "MISSIONCOLLEGE",
-      "total_ports": 10,
-      "company": "EMC",
-      "url": "https://na.chargepoint.com/dashboard/getChargeSpots?&lat=37.39041383851848&lng=-121.96937121940505&ne_lat=37.39105315337037&ne_lng=-121.9672026534165&sw_lat=37.3897745182144&sw_lng=-121.97153978539359&user_lat=37.83193351867604&user_lng=-122.20265718147691&search_lat=37.3881741&search_lng=-121.9793793&sort_by=distance&f_estimationfee=false&f_available=true&f_inuse=true&f_unknown=true&f_cp=true&f_other=true&f_l3=false&f_l2=true&f_l1=false&f_estimate=false&f_fee=true&f_free=true&f_reservable=false&f_shared=true&driver_connected_station_only=false&community_enabled_only=false&_=1405380831644",
-      "stations": {
-        "MISSIONCOLLEGE1": "",
-        "MISSIONCOLLEGE2": "",
-        "MISSIONCOLLEGE3": "",
-        "MISSIONCOLLEGE4": "",
-        "MISSIONCOLLEGE5": ""
-      }
-    },
     "Central": {
       "regex": "PG2",
       "total_ports": 13,
@@ -55,15 +42,6 @@
         "PG2-STATION 05": "",
         "PG2-STATION 06": "",
         "PG2-STATION 07": ""
-      }
-    },
-    "Santa Clara": {
-      "regex": "SANTA",
-      "total_ports": 2,
-      "company": "EMC",
-      "url": "https://na.chargepoint.com/dashboard/getChargeSpots?&lat=37.38877696416435&lng=-121.97968816798402&ne_lat=37.39005561633451&ne_lng=-121.9742996100731&sw_lat=37.38749829018581&sw_lng=-121.98507672589494&user_lat=37.8317378&user_lng=-122.20247309999999&search_lat=37.388615&search_lng=-121.98040700000001&sort_by=distance&f_estimationfee=false&f_available=true&f_inuse=true&f_unknown=true&f_cp=true&f_other=false&f_l3=true&f_l2=true&f_l1=false&f_estimate=false&f_fee=true&f_free=true&f_reservable=false&f_shared=true&driver_connected_station_only=false&community_enabled_only=false&_=1403829763999",
-      "stations": {
-        "SANTA CLARA": ""
       }
     }
   }
