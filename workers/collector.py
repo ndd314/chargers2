@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+from config import *
 import logging
 import anyconfig
 import loggly.handlers
@@ -18,9 +19,6 @@ logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(logging.I
 
 from changepoint import Charger, ChargePointConnection
 
-
-
-
 import copy
 import redis
 import json
@@ -33,10 +31,7 @@ application = newrelic.agent.register_application(timeout=10.0)
 credentials = anyconfig.load("private_config.json")['credentials']
 garage_data = anyconfig.load("private_config.json")['garage_data']
 
-cp = ChargePointConnection(credentials['ChargePoint']['user'],
-                           credentials['ChargePoint']['password'],
-                           credentials['ChargePoint']['chargepoint_login_url']
-)
+cp = ChargePointConnection(CHARGEPOINT_USERNAME, CHARGEPOINT_PASSWORD)
 
 r = redis.Redis(
     host=credentials['Redis']['server'],
@@ -45,7 +40,6 @@ r = redis.Redis(
     # port=credentials['Redis']['port']
 )
 
-
 @newrelic.agent.background_task()
 def get_current():
 
@@ -53,7 +47,7 @@ def get_current():
     for garage_name, garage_info in local_garage_data.iteritems():
         local_garage_data[garage_name][u'available_ports'] = 0
         logger.debug("Starting with garage {}".format(garage_name))
-        for charger in cp.get_stations_info(garage_info['url'], regex=garage_info['regex']):
+        for charger in cp.get_vmware_stations(regex=garage_info['regex']):
             logger.debug("Processing: {}:{}".format(garage_name,charger.sname))
             local_garage_data[garage_name]['stations'][charger.sname] = charger.port_count["available"]
             if 'available_ports' in local_garage_data[garage_name]:
@@ -61,7 +55,6 @@ def get_current():
             else:
                 local_garage_data[garage_name][u'available_ports'] = charger.port_count["available"]
     return local_garage_data
-
 
 @newrelic.agent.background_task()
 def store_to_redis(data):
