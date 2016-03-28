@@ -17,7 +17,12 @@ class Alerter:
       self.logger.setLevel(logging.INFO)
       self.garage_data = anyconfig.load("garage_data.json")['garage_data']
       self.sg = sendgrid.SendGridClient(SENDGRID_USERNAME, SENDGRID_PASSWORD)
-      self.keen_client = KeenClient(project_id=KEEN_PROJECT_ID, write_key=KEEN_WRITE_KEY, read_key=KEEN_READ_KEY)
+      self.keen_client = KeenClient(
+         project_id=KEEN_PROJECT_ID,
+         write_key=KEEN_WRITE_KEY,
+         read_key=KEEN_READ_KEY,
+         base_url=KEEN_API_URL
+      )
 
    def is_email(self, address):
       assert isinstance(address, str)
