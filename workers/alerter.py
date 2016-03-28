@@ -1,44 +1,21 @@
 import logging
 import anyconfig
-import loggly.handlers
 from keen.client import KeenClient  # TODO is this a mixpanel thing?
 from config import *
 from easy_sms import EasySms
 
-# from twilio.rest import TwilioRestClient
 import sendgrid
 import redis
-from pprint import pprint
 import re
 import json
 import newrelic.agent
 
 class Alerter:
    def __init__(self):
+      logging.basicConfig()
       self.logger = logging.getLogger()
       self.logger.setLevel(logging.INFO)
-      self.formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-      logging.basicConfig()
-
-      # loggly_handler = loggly.handlers.HTTPSHandler(url="{}{}".format(credentials["Loggly"]["url"], "alerter"))
-      # loggly_handler.setLevel(logging.DEBUG)
-      # logger.addHandler(loggly_handler)
-      # logging.getLogger("newrelic").setLevel(logging.INFO)
-      # logging.getLogger("anyconfig").setLevel(logging.INFO)
-      # logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(logging.INFO)
-
-       #TODO loggly, newrelic
-
-      # newrelic.agent.initialize('newrelic.ini')
-      # application = newrelic.agent.register_application(timeout=10.0)
-
       self.garage_data = anyconfig.load("garage_data.json")['garage_data']
-
-      # twilio_client = TwilioRestClient(
-      #     credentials['Twilio']['account_sid'],
-      #     credentials['Twilio']['auth_token']
-      # )
-
       self.sg = sendgrid.SendGridClient(SENDGRID_USERNAME, SENDGRID_PASSWORD)
 
       # keen_client = KeenClient(
@@ -71,26 +48,20 @@ class Alerter:
 
    @newrelic.agent.background_task()
    def send_email(self, address, garage):
-      logging.info("Sending email about {} to {}".format(garage, address))
+      self.logger.info("send_email(): Sending email about {} to {}".format(garage, address))
       message = sendgrid.Mail()
       message.add_to(address)
       message.set_subject("{} has a new spot open, Hurry!".format(garage))
       message.set_text("Go get it!") #todo add how many spots are there
       message.set_from(SENDGRID_EMAIL_FROM)
-      sg.send(message)
+      self.sg.send(message)
 
 
    @newrelic.agent.background_task()
    def send_txt(self, address, garage):
-      logging.info("Sending txt about {} to {}".format(garage, address))
+      self.logger.info("send_txt(): Sending txt about {} to {}".format(garage, address))
       body = "{} has a new spot open. Hurry!".format(garage),
       EasySms.send_sms(to=address, body=body)
-
-      # twilio_client.messages.create(
-      #     to=address,
-      #     from_="+16504092352",
-      #     body=body
-      # )
 
 
    @newrelic.agent.background_task()
@@ -117,7 +88,7 @@ class Alerter:
             all_changes[station_name] = cur_stations[station_name]
 
       if len(all_changes) > 0:
-         logging.info("Chargers changes: {}".format(all_changes))
+         self.logger.info("find_changes(): Chargers changes: {}".format(all_changes))
          # keen_client.add_event("chargers", all_changes)
 
       return stations_with_new_spots
@@ -125,11 +96,11 @@ class Alerter:
 
    @newrelic.agent.background_task()
    def clear_subs_for_user(self, target):
-      logging.debug("Clearing sub for user {}".format(target))
+      self.logger.info("clear_subs_for_user(): Clearing sub for user {}".format(target))
       for key in self.redis_con_alerter.keys("SUB-*"):
          if self.redis_con_alerter.type(key) == "set":
             self.redis_con_alerter.srem(key, target)
-            logging.debug("Removing user {} from subscription to {}".format(target, key))
+            self.logger.info("clear_subs_for_user(): Removing user {} from subscription to {}".format(target, key))
 
 
    @newrelic.agent.background_task()
@@ -140,17 +111,17 @@ class Alerter:
 
       # todo add tests
       for item in pubsub.listen():
-         self.logger.info("main_loop: Got a new alert. Processing now ...")
+         self.logger.info("alerter.main_loop(): Got a new alert. Processing now ...")
          if item['type'] == "message":
-            logging.debug("received alert of new info with timstamp {}".format(item['data']))
+            self.logger.debug("alerter.main_loop(): received alert of new info with timstamp {}".format(item['data']))
             for station in self.find_changes():
-               logging.info("Found new station {}...checking for subscriptions".format(station))
+               self.logger.info("alerter.main_loop(): Found new station {}...checking for subscriptions".format(station))
                if len(self.redis_con_alerter.smembers("SUB-{}".format(station))) == 0:
-                  logging.info("No notifications to send for station {}".format(station))
+                  self.logger.info("alerter.main_loop(): No notifications to send for station {}".format(station))
                for target in self.redis_con_alerter.smembers("SUB-{}".format(station)):
-                  logging.info("Found member to notifify for {}: {}".format(station, target))
+                  self.logger.info("alerter.main_loop(): Found member to notifify for {}: {}".format(station, target))
                   self.send_alert(target, "{}".format(station))
-         self.logger.info("main_loop: done processing alert.")
+         self.logger.info("alerter.main_loop(): done processing alert.")
 
 if __name__ == "__main__":
    Alerter.main_loop()

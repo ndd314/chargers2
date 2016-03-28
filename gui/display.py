@@ -13,7 +13,6 @@ import os
 import json
 import datetime
 import time
-from pprint import pprint
 from datetime import timedelta
 from babel.dates import format_timedelta
 import newrelic.agent
@@ -24,7 +23,6 @@ import newrelic.agent
 
 logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 garage_data = anyconfig.load("garage_data.json")['garage_data']
 r = redis.from_url(REDIS_URL)
@@ -168,5 +166,5 @@ def addsub_get():
 
 if __name__ == "__main__":
    port = int(os.getenv('PORT', '5000'))
-   logging.info("Running on port {}".format(port))
+   logger.info("Running on port {}".format(port))
    app.run(host='0.0.0.0', port=port)
