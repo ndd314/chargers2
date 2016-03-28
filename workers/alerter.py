@@ -2,7 +2,7 @@ import logging
 import anyconfig
 from keen.client import KeenClient
 from config import *
-from easy_sms import EasySms
+from easysms import EasySms
 
 import sendgrid
 import redis
@@ -139,7 +139,7 @@ class Alerter:
                if len(queue_members) == 0:
                   self.logger.info("alerter.main_loop(): No notifications to send for garage {}".format(garage_name))
                for target in queue_members:
-                  self.logger.info("alerter.main_loop(): Notifying {} for {} changes: {}".format(target, garage_name))
+                  self.logger.info("alerter.main_loop(): Notifying {} for {} changes.".format(target, garage_name))
                   self.send_alert(target, garage_name)
 
          self.logger.info("alerter.main_loop(): done processing alert.")
