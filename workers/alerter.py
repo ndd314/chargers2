@@ -16,7 +16,7 @@ import newrelic.agent
 class Alerter:
    def __init__(self):
       self.logger = logging.getLogger()
-      self.logger.setLevel(logging.DEBUG)
+      self.logger.setLevel(logging.INFO)
       self.formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
       logging.basicConfig()
 

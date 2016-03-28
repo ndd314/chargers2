@@ -8,7 +8,7 @@ import loggly.handlers
 # TODO add logging and newrelic monitor
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logging.basicConfig()
 

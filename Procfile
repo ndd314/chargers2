@@ -1,2 +1,2 @@
-web: python gui/display.py
-worker: PYTHONPATH=. python workers/main.py
+web: newrelic-admin run-program python gui/display.py
+worker: PYTHONPATH=. newrelic-admin run-program python workers/main.py
