@@ -21,4 +21,10 @@ heroku addons:create heroku-redis:hobby-dev -a vmwarechargepoint
 heroku config:set CP_USERNAME=xxx CP_PASSWORD=xxx GOOGLE_ANALYTICS_SITE_ID=xxx
 git push heroku
 heroku ps:scale worker=1
+
+# Adding other services
+heroku addons:create sendgrid:starter
+heroku addons:create easysms:test
+heroku addons:create newrelic:wayne
+heroku config:set NEW_RELIC_APP_NAME='vmwarechargepoint'
 ```
