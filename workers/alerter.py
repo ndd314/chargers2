@@ -50,8 +50,9 @@ class Alerter:
       self.logger.info("send_email(): Sending email about {} to {}".format(garage, address))
       message = sendgrid.Mail()
       message.add_to(address)
-      message.set_subject("{} has a new spot open, Hurry!".format(garage))
-      message.set_text("Go get it!") #todo add how many spots are there
+      message_text = "{} has a new spot open".format(garage)
+      message.set_subject(message_text)
+      message.set_text(message_text) #todo add how many spots are there
       message.set_from(SENDGRID_EMAIL_FROM)
       self.sg.send(message)
 
@@ -59,7 +60,7 @@ class Alerter:
    @newrelic.agent.background_task()
    def send_txt(self, address, garage):
       self.logger.info("send_txt(): Sending txt about {} to {}".format(garage, address))
-      body = "{} has a new spot open. Hurry!".format(garage),
+      body = "{} has a new spot open".format(garage),
       EasySms.send_sms(to=address, body=body)
 
 
@@ -87,10 +88,13 @@ class Alerter:
          if cur_stations[station_name] != prev_stations[station_name]:
             all_changes[station_name] = cur_stations[station_name]
 
+      self.logger.info("find_changes(): all chargers changes: {}".format(all_changes))
+
       if len(all_changes) > 0:
-         self.logger.info("find_changes(): Chargers changes: {}".format(all_changes))
+         self.logger.info("find_changes(): sending keen events: {}".format(all_changes))
          self.keen_client.add_event("chargers", all_changes)
 
+      self.logger.info("find_changes(): stations with new spots {}".format(stations_with_new_spots))
       return stations_with_new_spots
 
 
@@ -118,20 +122,26 @@ class Alerter:
 
       # todo add tests
       for item in pubsub.listen():
-         self.logger.info("alerter.main_loop(): Got a new alert. Processing now ...")
+         self.logger.info("alerter.main_loop(): Got a new alert. Processing ...")
+
          if item['type'] == "message":
-            self.logger.debug("alerter.main_loop(): received alert of new info with timstamp {}".format(item['data']))
+            self.logger.info("alerter.main_loop(): received alert of new info with timstamp {}".format(item['data']))
+
             for station in self.find_changes():
                self.logger.info("alerter.main_loop(): Found new station {}...checking for subscriptions".format(station))
 
                garage_name = self.find_garage(station)
                queue_name = "SUB-{}".format(garage_name)
 
-               if len(self.redis_connection.smembers(queue_name)) == 0:
-                  self.logger.info("alerter.main_loop(): No notifications to send for station {}".format(station))
-               for target in self.redis_connection.smembers(queue_name):
-                  self.logger.info("alerter.main_loop(): Found member to notifify for {}: {}".format(station, target))
-                  self.send_alert(target, "{}".format(station))
+               self.logger.info("alerter.main_loop(): Checking queue {} for members".format(queue_name))
+               queue_members = self.redis_connection.smembers(queue_name)
+
+               if len(queue_members) == 0:
+                  self.logger.info("alerter.main_loop(): No notifications to send for garage {}".format(garage_name))
+               for target in queue_members:
+                  self.logger.info("alerter.main_loop(): Notifying {} for {} changes: {}".format(target, garage_name))
+                  self.send_alert(target, garage_name)
+
          self.logger.info("alerter.main_loop(): done processing alert.")
 
 if __name__ == "__main__":
