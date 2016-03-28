@@ -65,11 +65,12 @@ class Alerter:
 
    @newrelic.agent.background_task()
    def find_changes(self):
-      current = json.loads(self.redis_con_alerter.hget("current", "data"))
-      previous = json.loads(self.redis_con_alerter.hget("previous", "data"))
+      current = json.loads(self.redis_connection.hget("current", "data"))
+      previous = json.loads(self.redis_connection.hget("previous", "data"))
 
       cur_stations = {}
       prev_stations = {}
+
       for garage in current.itervalues():
          cur_stations.update(garage['stations'])
 
@@ -96,16 +97,23 @@ class Alerter:
    @newrelic.agent.background_task()
    def clear_subs_for_user(self, target):
       self.logger.info("clear_subs_for_user(): Clearing sub for user {}".format(target))
-      for key in self.redis_con_alerter.keys("SUB-*"):
-         if self.redis_con_alerter.type(key) == "set":
-            self.redis_con_alerter.srem(key, target)
+      for key in self.redis_connection.keys("SUB-*"):
+         if self.redis_connection.type(key) == "set":
+            self.redis_connection.srem(key, target)
             self.logger.info("clear_subs_for_user(): Removing user {} from subscription to {}".format(target, key))
+
+   def find_garage(self, station):
+      # station = PG3-STATION 26 for example
+      # PG1 is Hilltop, PG2 is Central, PG3 is Creekside
+      garages = ['Hilltop', 'Central', 'Creekside']
+      garage_array_index = int(station[2]) - 1
+      return garages[garage_array_index]
 
 
    @newrelic.agent.background_task()
    def main_loop(self):
-      self.redis_con_alerter = redis.StrictRedis.from_url(REDIS_URL)
-      pubsub = self.redis_con_alerter.pubsub()
+      self.redis_connection = redis.StrictRedis.from_url(REDIS_URL)
+      pubsub = self.redis_connection.pubsub()
       pubsub.subscribe(REDIS_CHANNEL)
 
       # todo add tests
@@ -115,9 +123,13 @@ class Alerter:
             self.logger.debug("alerter.main_loop(): received alert of new info with timstamp {}".format(item['data']))
             for station in self.find_changes():
                self.logger.info("alerter.main_loop(): Found new station {}...checking for subscriptions".format(station))
-               if len(self.redis_con_alerter.smembers("SUB-{}".format(station))) == 0:
+
+               garage_name = self.find_garage(station)
+               queue_name = "SUB-{}".format(garage_name)
+
+               if len(self.redis_connection.smembers(queue_name)) == 0:
                   self.logger.info("alerter.main_loop(): No notifications to send for station {}".format(station))
-               for target in self.redis_con_alerter.smembers("SUB-{}".format(station)):
+               for target in self.redis_connection.smembers(queue_name):
                   self.logger.info("alerter.main_loop(): Found member to notifify for {}: {}".format(station, target))
                   self.send_alert(target, "{}".format(station))
          self.logger.info("alerter.main_loop(): done processing alert.")
