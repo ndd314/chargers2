@@ -27,4 +27,6 @@ heroku addons:create sendgrid:starter
 heroku addons:create easysms:test
 heroku addons:create newrelic:wayne
 heroku config:set NEW_RELIC_APP_NAME='vmwarechargepoint'
+heroku addons:create logmatic:test
+heroku addons:create keen:developer
 ```

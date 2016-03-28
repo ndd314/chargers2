@@ -1,6 +1,6 @@
 import logging
 import anyconfig
-from keen.client import KeenClient  # TODO is this a mixpanel thing?
+from keen.client import KeenClient
 from config import *
 from easy_sms import EasySms
 
@@ -17,13 +17,7 @@ class Alerter:
       self.logger.setLevel(logging.INFO)
       self.garage_data = anyconfig.load("garage_data.json")['garage_data']
       self.sg = sendgrid.SendGridClient(SENDGRID_USERNAME, SENDGRID_PASSWORD)
-
-      # keen_client = KeenClient(
-      #         project_id=credentials['Keen']['project_id'],
-      #         write_key=credentials['Keen']['write_key'],
-      #         read_key=credentials['Keen']['read_key'],
-      #         master_key=credentials['Keen']['master_key']
-      # )
+      self.keen_client = KeenClient(project_id=KEEN_PROJECT_ID, write_key=KEEN_WRITE_KEY, read_key=KEEN_READ_KEY)
 
    def is_email(self, address):
       assert isinstance(address, str)
@@ -89,7 +83,7 @@ class Alerter:
 
       if len(all_changes) > 0:
          self.logger.info("find_changes(): Chargers changes: {}".format(all_changes))
-         # keen_client.add_event("chargers", all_changes)
+         self.keen_client.add_event("chargers", all_changes)
 
       return stations_with_new_spots
 
