@@ -137,7 +137,6 @@ class Alerter:
       self.redis_con_alerter = redis.StrictRedis.from_url(REDIS_URL)
       pubsub = self.redis_con_alerter.pubsub()
       pubsub.subscribe(REDIS_CHANNEL)
-      print "### pubsub_id: {}".format(id(pubsub))
 
       # todo add tests
       for item in pubsub.listen():
