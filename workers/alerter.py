@@ -2,7 +2,7 @@ import logging
 import anyconfig
 from keen.client import KeenClient
 from config import *
-from easysms import EasySms
+from easy_sms import EasySms
 
 import sendgrid
 import redis
