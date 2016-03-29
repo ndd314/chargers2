@@ -4,12 +4,10 @@ Flask
 Flask-Cache
 Flask-Analytics
 keen
-loggly-handler
 newrelic
 redis
 requests
 sendgrid
-twilio
 
 Jinja2
 MarkupSafe
