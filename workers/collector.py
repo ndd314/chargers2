@@ -3,7 +3,6 @@ from __future__ import print_function
 from config import *
 import logging
 import anyconfig
-import loggly.handlers
 
 # TODO add logging and newrelic monitor
 
