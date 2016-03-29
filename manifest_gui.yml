@@ -1,0 +1,8 @@
+---
+memory: 64M
+instances: 1
+buildpack: python_buildpack
+
+- name: vmwarechargepoint-gui
+  host: vmwarechargepoint
+  command: PYTHONPATH=. newrelic-admin run-program python gui/display.py
