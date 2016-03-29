@@ -17,12 +17,17 @@ class Alerter:
       self.logger.setLevel(logging.INFO)
       self.garage_data = anyconfig.load("garage_data.json")['garage_data']
       self.sg = sendgrid.SendGridClient(SENDGRID_USERNAME, SENDGRID_PASSWORD)
-      self.keen_client = KeenClient(
-         project_id=KEEN_PROJECT_ID,
-         write_key=KEEN_WRITE_KEY,
-         read_key=KEEN_READ_KEY,
-         base_url=KEEN_API_URL
-      )
+      self.keen_client = None
+
+   def __keen_client(self):
+      if KEEN_CLIENT_ENABLED and self.keen_client == None:
+         self.keen_client = KeenClient(
+            project_id=KEEN_PROJECT_ID,
+            write_key=KEEN_WRITE_KEY,
+            read_key=KEEN_READ_KEY,
+            base_url=KEEN_API_URL
+         )
+      return self.keen_client
 
    def is_email(self, address):
       assert isinstance(address, str)
@@ -90,7 +95,7 @@ class Alerter:
 
       self.logger.info("find_changes(): all chargers changes: {}".format(all_changes))
 
-      if len(all_changes) > 0:
+      if KEEN_CLIENT_ENABLED and all_changes > 0:
          self.logger.info("find_changes(): sending keen events: {}".format(all_changes))
          self.keen_client.add_event("chargers", all_changes)
 
