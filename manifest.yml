@@ -1,25 +1,14 @@
 ---
+memory: 64M
+instances: 1
+buildpack: python_buildpack
+
+- name: vmwarechargepoint-gui
+  host: vmwarechargepoint
+  command: PYTHONPATH=. newrelic-admin run-program python gui/display.py
+
 applications:
-- name: chargersv2-workers
-  memory: 64M
+- name: vmwarechargepoint-workers
   no-route: true
-  instances: 1
-  path: ./workers
-  buildpack: python_buildpack
-  command: python workers.py
-
-- name: chargersv2-alerter
-  memory: 64M
-  no-route: true
-  instances: 1
-  path: ./alerter
-  buildpack: python_buildpack
-  command: python alerter.py
-
-- name: chargersv2-gui
-  memory: 64M
-  instances: 1
-  host: chargers
-  path: ./gui
-  buildpack: python_buildpack
-  command: python display.py
+  command: PYTHONPATH=. newrelic-admin run-program python workers/main.py
+  health-check-type: none
