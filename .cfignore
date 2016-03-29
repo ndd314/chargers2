@@ -1,0 +1,13 @@
+.cache/
+.git/
+.gitignore
+.idea/
+.travis.yml
+README.markdown
+*.pyc
+fixture/
+placeholder/
+*.example
+requirements_test.txt
+scripts/
+venv/
